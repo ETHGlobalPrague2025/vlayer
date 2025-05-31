@@ -23,7 +23,7 @@ const {
 
 if (!john) {
   throw new Error(
-    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables"
   );
 }
 
@@ -43,23 +43,29 @@ const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
+console.log("Vlayer", vlayer);
+const preverification = await preverifyEmail({
+  mimeEmail,
+  dnsResolverUrl: dnsServiceUrl,
+  token: config.token,
+});
+console.log("Preverification", preverification);
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
   gasLimit: config.gasLimit,
-  args: [
-    await preverifyEmail({
-      mimeEmail,
-      dnsResolverUrl: dnsServiceUrl,
-      token: config.token,
-    }),
-  ],
+  args: [preverification],
 });
-const result = await vlayer.waitForProvingResult({ hash });
+console.log("Proving hash:", hash);
+const result = await vlayer.waitForProvingResult({
+  hash,
+  numberOfRetries: 60,
+  sleepDuration: 1000,
+});
 
-console.log(result)
+console.log(result);
 console.log("Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia

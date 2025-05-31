@@ -33,6 +33,6 @@ contract EmailDomainProverTest is VTest {
 
         assertEq(emailHash, sha256(abi.encodePacked(verifiedEmail.from)));
         assertEq(registeredWallet, johnDoe);
-        assertEq(emailDomain, "vlayer.xyz");
+        assertEq(emailDomain, "gmail.com");
     }
 }
