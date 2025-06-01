@@ -46,10 +46,38 @@ if (!john) {
 
 const mimeEmail = fs.readFileSync("./verify_vlayer.eml").toString();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<any>
-) {
+// Initialize CORS middleware
+
+// Helper to run middleware
+function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: Function) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Set CORS headers
+  console.log("shi")
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  // Your existing API logic here
   if (req.method === "POST") {
     const { data } = req.body;
 
